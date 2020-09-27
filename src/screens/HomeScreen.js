@@ -55,7 +55,7 @@ const HomeScreen = ({navigation}) => {
       let username;
       database()
         .ref('/users/' + data.id)
-        .on('value', (data) => {
+        .once('value', (data) => {
           username = data.child('username').toJSON();
           setName(username);
         });

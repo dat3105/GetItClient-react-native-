@@ -3,12 +3,19 @@ import { View, Text, StyleSheet, Image } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import * as theme from '../constants/theme'
 
-const BillCard = () => {
+const BillCard = (props) => {
+    function thousands_separators(num)
+    {
+      var num_parts = num.toString().split(".");
+      num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return num_parts.join(".");
+    }
+  
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Icon name="receipt-outline" size={20} color="#ffffff"/>
-                <Text style={styles.title}>Mã hoá đơn: cwndjskcnSXmascadcsd</Text>
+    <Text style={styles.title}>Mã hoá đơn: {props.item.id}</Text>
                 
             </View>
             <View style={styles.body}>
@@ -18,9 +25,9 @@ const BillCard = () => {
                     <Text>Trạng thái:</Text>
                 </View>
                 <View style={styles.bodyText}>
-                    <Text style={{fontWeight:'bold'}}>03/06/2020 09:30</Text>
-                    <Text style={{paddingVertical:12,color:'red'}}>12.000.000 đ</Text>
-                    <Text style={{color:'green'}}>Đang chờ xác nhận</Text>
+    <Text style={{fontWeight:'bold'}}>{props.item.date}</Text>
+    <Text style={{paddingVertical:12,color:'red'}}>{thousands_separators(props.item.price)}đ</Text>
+    <Text style={{color:'green'}}>{props.item.status}</Text>
                 </View>
 
                 <Image source={require('../image/icon.png')} style={styles.image}/>

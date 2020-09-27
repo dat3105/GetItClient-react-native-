@@ -1,59 +1,103 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import { View, Text, SafeAreaView, StyleSheet, } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import PayCard from '../component/PayCard'
 import Button from '../component/Button'
 import * as theme from '../constants/theme'
+import database from '@react-native-firebase/database'
+import AsyncStorage from '@react-native-community/async-storage'
 
-const BillDetailScreen = () => {
+const BillDetailScreen = ({navigation,route}) => {
+    const [bill,setBill]= useState({idBill:'',date:'',address:'',status:'',sumPrice:'',listLaptop:[]})
+    const [user,setUser] = useState('')
+
+    const getData = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('UserId')
+            console.log(jsonValue)
+            return jsonValue != null ? JSON.parse(jsonValue) : null;
+
+        } catch (e) {
+            // error reading value
+        }
+    }
+
+    useEffect(()=>{
+        getData().then(data=>{
+            let user ={id:'',name:'',phone:'',email:'',img:''}
+        database().ref("/users/" + data.id).on('value', value => {
+
+            user.id = value.child("userid").toJSON()
+            user.name= value.child("username").toJSON()
+            user.email = value.child("email").toJSON()
+            user.phone = value.child("phone").toJSON()
+            user.img = value.child("avatar").toJSON()
+            console.log(user)
+            setUser(user)
+        })
+        })
+        database().ref("/bill").orderByChild('idBill').equalTo(route.params.idBill).once('value',value=>{
+            value.forEach(item=>{
+                let bill={idBill:'',date:'',address:'',status:'',sumPrice:'',listLaptop:[]}
+                bill.idBill =item.child('idBill').toJSON()
+                bill.status = item.child('status').toJSON() === "đang chờ"? "Đang chờ xác nhận": "Đã xác nhận"
+                bill.date = item.child('date').toJSON()
+                bill.sumPrice = item.child('sumPrice').toJSON()
+                bill.listLaptop = item.child('listLapOrder').toJSON()
+                console.log(bill.listLaptop)
+                setBill(bill)
+            })
+        })
+
+        
+    },[])
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView >
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
                     <Text style={{fontWeight:'bold'}}>MÃ HOÁ ĐƠN: </Text>
-                    <Text> DvdfvdfbddfbHFGBFL</Text>
+    <Text> {bill.idBill}</Text>
                 </View>
-                <PayCard />
-                <PayCard />
+                {bill.listLaptop.map(item=>(
+                    <PayCard product={item}/>
+                ))}
                 <View style={styles.userComponent}>
                     <Text style={styles.headTitle}>Thông tin khách hàng</Text>
                     <View style={styles.userContaint}>
                         <Text style={styles.title}>Họ và tên: </Text>
-                        <Text>Đinh Công Hiến</Text>
+                        <Text>{user.name}</Text>
                     </View>
                     <View style={styles.userContaint}>
                         <Text style={styles.title}>Email: </Text>
-                        <Text>a@gmail.com</Text>
+                        <Text>{user.email}</Text>
                     </View>
                     <View style={styles.userContaint}>
                         <Text style={styles.title}>SĐT:  </Text>
-                        <Text>123456789 </Text>
+                        <Text>{user.phone} </Text>
                     </View>
                 </View>
                 <View style={styles.userComponent}>
                     <Text style={styles.headTitle}>Trạng thái thanh toán và thời gian đặt hàng</Text>
+                    
                     <View style={styles.userContaint}>
 
                         <Text style={styles.title}>Thời gian đặt hàng: </Text>
-                        <Text>03/06/2020 09:30</Text>
+                        <Text>{bill.date}</Text>
                     </View>
+
                     <View style={styles.userContaint}>
                         <Text style={styles.title}>Trạng thái:  </Text>
-                        <Text>Đang chờ xác nhận </Text>
+                        <Text>{bill.status} </Text>
                     </View>
 
                 </View>
 
                 <View style={styles.payContainer}>
                     <Text style={styles.headTitle}>Tổng thanh toán:</Text>
-                    <Text style={{fontWeight:'bold'}}>7.300.000 đ</Text>
+            <Text style={{fontWeight:'bold'}}>{bill.sumPrice}đ</Text>
                 </View>
 
-                <View style={styles.button}>
-                    <Button title="Xác Nhận" style={styles.confirmButton} color={{backgroundColor:
-                        "#01A65C", paddingHorizontal: 35}}/>
-                    <Button title="Huỷ Đơn Hàng" color={{backgroundColor:'red',paddingHorizontal: 12}} style={styles.cancelButton}/>
-                </View>
+                
             </ScrollView>
         </SafeAreaView>
     )
@@ -97,6 +141,9 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between'
     },
+    confirmButton: {
+        height:75
+    }
     
 })
 

@@ -17,6 +17,7 @@ import RegisterScreen from '../screens/RegisterScreen'
 import { NavigationContainer } from '@react-navigation/native';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import ConfirmbillScreen from '../screens/ConfirmbillScreen'
+import  BillDetailScreen from '../screens/BillDetailScreen'
 
 
 const Stack = createStackNavigator()
@@ -45,6 +46,8 @@ export const MainStackNavigation = () => {
                 <Stack.Screen name="EditProfileScreen" component={EditProfileScreen}
                 options={headerStyle}/>
                 <Stack.Screen name="ConfirmbillScreen" component={ConfirmbillScreen}
+                options={headerStyle}/>
+                <Stack.Screen name="BillDetailScreen" component={BillDetailScreen}
                 options={headerStyle}/>
             </Stack.Navigator>
         </NavigationContainer>
